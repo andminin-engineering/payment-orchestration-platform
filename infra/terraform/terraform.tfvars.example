@@ -1,0 +1,16 @@
+project_name   = "payment-orchestration-platform"
+environment    = "dev"
+aws_region     = "us-east-1"
+base_cidr      = "10.30.0.0/16"
+db_name        = "paymentdb"
+db_username    = "payment_admin"
+
+enable_network = true
+enable_rds     = true
+enable_ecs     = true
+enable_secrets = true
+
+common_tags = {
+  Owner      = "andminin.biz"
+  CostCenter = "platform"
+}
