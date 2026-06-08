@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-test:
     name: Build and Test
@@ -26,7 +29,16 @@ jobs:
           cache: maven
 
       - name: Build and run tests
-        run: mvn -B clean verify
+        run: mvn -B -e clean verify
+
+      - name: Print surefire reports on failure
+        if: ${{ failure() }}
+        run: |
+          if ls target/surefire-reports/*.txt 1> /dev/null 2>&1; then
+            cat target/surefire-reports/*.txt
+          else
+            echo "No surefire report files found."
+          fi
 
   sonarcloud:
     name: SonarCloud Scan
