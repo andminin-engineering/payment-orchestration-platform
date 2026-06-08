@@ -54,7 +54,7 @@ class PaymentControllerTest {
             new CreatePaymentResponse("pay-123", "AUTHORIZED", "tx-789")
         );
 
-        mockMvc.perform(post("/api/v1/payments")
+        mockMvc.perform(post("/v1/payments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -75,7 +75,7 @@ class PaymentControllerTest {
             }
             """;
 
-        mockMvc.perform(post("/api/v1/payments")
+        mockMvc.perform(post("/v1/payments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidBody))
             .andExpect(status().isBadRequest())
@@ -89,7 +89,7 @@ class PaymentControllerTest {
             new PaymentProviderException("upstream down", "UPSTREAM_ERR", "DUMMY")
         );
 
-        mockMvc.perform(post("/api/v1/payments/payment-1/capture"))
+        mockMvc.perform(post("/v1/payments/payment-1/capture"))
             .andExpect(status().isBadGateway())
             .andExpect(jsonPath("$.error").value("PaymentProviderError"));
     }
@@ -101,7 +101,7 @@ class PaymentControllerTest {
             new GetPaymentStatusResponse("payment-200", "COMPLETED", "100.00 USD", "tx-200")
         );
 
-        mockMvc.perform(get("/api/v1/payments/payment-200"))
+        mockMvc.perform(get("/v1/payments/payment-200"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.paymentId").value("payment-200"))
             .andExpect(jsonPath("$.status").value("COMPLETED"));
