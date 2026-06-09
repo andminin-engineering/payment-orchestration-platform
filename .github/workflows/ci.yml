@@ -11,6 +11,9 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SONAR_HOST_URL: https://sonarcloud.io
+  SONAR_ORGANIZATION: andminin-biz
+  SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY || 'andminin-engineering_payment-orchestration-platform' }}
 
 jobs:
   build-test:
@@ -60,13 +63,26 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Sonar preflight (non-secret checks)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          echo "SONAR_HOST_URL=${SONAR_HOST_URL}"
+          echo "SONAR_ORGANIZATION=${SONAR_ORGANIZATION}"
+          echo "SONAR_PROJECT_KEY=${SONAR_PROJECT_KEY}"
+          if [ -z "${SONAR_TOKEN:-}" ]; then
+            echo "SONAR_TOKEN is not configured in environment 'production'."
+            exit 1
+          fi
+
       - name: Analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: >
-          mvn -B verify sonar:sonar
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.organization=andminin-engineering
-          -Dsonar.projectKey=andminin-engineering_payment-orchestration-platform
-          -Dsonar.token=${SONAR_TOKEN}
+        run: |
+          mvn -B -e -X verify sonar:sonar \
+            -Dsonar.host.url=${SONAR_HOST_URL} \
+            -Dsonar.organization=${SONAR_ORGANIZATION} \
+            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+            -Dsonar.token=${SONAR_TOKEN} \
+            -Dsonar.qualitygate.wait=true

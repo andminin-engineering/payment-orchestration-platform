@@ -50,3 +50,28 @@ No continuar con deploy hasta tener SonarCloud Scan en verde en main.
       - host fijo: https://sonarcloud.io
       - token desde secret SONAR_TOKEN
 - Proximo paso: push y rerun de CI en main para confirmar SonarCloud Scan en verde.
+
+## Update 2026-06-09 (segunda iteracion)
+- Nuevo error observado en SonarCloud Scan:
+   - "You must define mandatory property: sonar.organization"
+- Causa:
+   - El plugin sonar-maven en este flujo no tomo la propiedad desde sonar-project.properties.
+- Fix aplicado:
+   - En .github/workflows/ci.yml se agregaron explicitamente:
+      - -Dsonar.organization=andminin-engineering
+      - -Dsonar.projectKey=andminin-engineering_payment-orchestration-platform
+- Commit aplicado en main:
+   - 6c8d59f970e00ff7e873e92e260b14f48020cb1a
+- Estado actual:
+   - CI run #18 en espera de aprobacion de environment production.
+
+## Update 2026-06-09 (tercera iteracion)
+- Se confirmo el organization key real de SonarCloud para este proyecto:
+   - andminin-biz
+- Evidencia:
+   - API publica de SonarCloud para el componente devolvio organization=andminin-biz.
+- Fix aplicado:
+   - .github/workflows/ci.yml ahora usa SONAR_ORGANIZATION=andminin-biz.
+   - sonar-project.properties tambien fue alineado a andminin-biz.
+- El project key se mantiene:
+   - andminin-engineering_payment-orchestration-platform
