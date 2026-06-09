@@ -10,7 +10,6 @@ import com.andminin.payment.domain.port.PaymentProviderException;
 import com.andminin.payment.domain.port.PaymentRefundResponse;
 import com.andminin.payment.domain.port.PaymentRepository;
 import com.andminin.payment.domain.port.ProviderAuthorization;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,11 +45,6 @@ class PaymentServiceTest {
     @InjectMocks
     private PaymentService paymentService;
 
-    @BeforeEach
-    void setUp() {
-        when(paymentProvider.getProviderName()).thenReturn("DUMMY");
-    }
-
     @Test
     @DisplayName("createPayment retorna existente por idempotency key")
     void createPaymentReturnsExistingPayment() throws Exception {
@@ -82,6 +76,7 @@ class PaymentServiceTest {
         CreatePaymentRequest request = createRequest("idem-002");
 
         when(paymentRepository.findByIdempotencyKey("idem-002")).thenReturn(Optional.empty());
+        when(paymentProvider.getProviderName()).thenReturn("DUMMY");
         when(paymentProvider.authorize(any(), any())).thenReturn(PaymentAuthorizationResponse.success("tx-new"));
 
         CreatePaymentResponse response = paymentService.createPayment(request);
