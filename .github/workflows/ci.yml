@@ -67,4 +67,6 @@ jobs:
         run: >
           mvn -B verify sonar:sonar
           -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=andminin-engineering
+          -Dsonar.projectKey=andminin-engineering_payment-orchestration-platform
           -Dsonar.token=${SONAR_TOKEN}
