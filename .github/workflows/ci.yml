@@ -64,12 +64,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         run: >
           mvn -B verify sonar:sonar
-          -Dsonar.host.url=${SONAR_HOST_URL}
-          -Dsonar.organization=${SONAR_ORGANIZATION}
-          -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+          -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.token=${SONAR_TOKEN}
