@@ -1,6 +1,13 @@
 name: Terraform CI
 
 on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Run terraform apply on main"
+        required: true
+        type: boolean
+        default: false
   pull_request:
     branches: ["main"]
     paths:
@@ -14,7 +21,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   terraform-validate:
@@ -45,8 +51,11 @@ jobs:
     name: Terraform Plan (main)
     runs-on: ubuntu-latest
     needs: terraform-validate
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
     environment: production
+    permissions:
+      contents: read
+      id-token: write
 
     defaults:
       run:
@@ -70,3 +79,36 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan -input=false
+
+  terraform-apply:
+    name: Terraform Apply (manual)
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.apply == true }}
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+
+    defaults:
+      run:
+        working-directory: infra/terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve
